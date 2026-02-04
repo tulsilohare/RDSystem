@@ -45,7 +45,7 @@ export default function API() {
   const [urid, Seturid] = useState(""); // RD user id for update
   const [urddate, SetuRDdate] = useState(""); // RD date for update
   const [urdamt, SetuRDamt] = useState(""); // RD amount for update
-  const [ufamt, Setufamt] = useState(""); // fixed amount for update
+  const [ufamt, Setufamt] = useState(""); // fixedzz amount for update
   const [ulday, Setulday] = useState(""); // late day for update
   const [uflag, Setuflag] = useState(""); // flag for update
 
