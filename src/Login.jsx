@@ -1,118 +1,133 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import axios from "axios";
+import { motion } from "framer-motion";
 
-export default function Login() {
+function Login() {
+  const [isLogin, setIsLogin] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [newUsername, setNewUsername] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [showSignup, setShowSignup] = useState(false);
 
-  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const getUsers = () => {
-    const users = localStorage.getItem("users");
-    return users ? JSON.parse(users) : [];
-  };
-
-  const saveUsers = (users) => {
-    localStorage.setItem("users", JSON.stringify(users));
-  };
-
-  const handleLogin = () => {
-    const users = getUsers();
-    const user = users.find(
-      (u) => u.username === username && u.password === password,
-    );
-
-    if (user) {
-      alert("Login Success!");
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      navigate("/product");
-    } else {
-      alert("Invalid username or password!");
+    try {
+      if (isLogin) {
+        const res = await axios.post("http://localhost:8080/login", {
+          username,
+          password,
+        });
+        alert(res.data);
+      } else {
+        await axios.post("http://localhost:8080/register", {
+          username,
+          password,
+        });
+        alert("Register Success");
+      }
+    } catch (err) {
+      alert("Backend Error");
     }
   };
 
-  const handleSignup = () => {
-    if (!newUsername || !newPassword) {
-      alert("Please enter username and password!");
-      return;
-    }
-
-    const users = getUsers();
-    const exists = users.find((u) => u.username === newUsername);
-
-    if (exists) {
-      alert("Username already exists!");
-      return;
-    }
-
-    users.push({ username: newUsername, password: newPassword });
-    saveUsers(users);
-    alert("Signup success!");
-    setShowSignup(false);
-    setNewUsername("");
-    setNewPassword("");
+  const styles = {
+    container: {
+      height: "100vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      background: "#f4f6f8",
+    },
+    card: {
+      width: "380px",
+      padding: "25px",
+      borderRadius: "15px",
+      background: "#e5e7eb",
+      border: "2px solid #2563eb",
+    },
+    title: {
+      textAlign: "center",
+      marginBottom: "20px",
+    },
+    inputBox: {
+      marginBottom: "15px",
+      textAlign: "left",
+    },
+    label: {
+      display: "block",
+      marginBottom: "6px",
+      fontWeight: "500",
+    },
+    input: {
+      width: "100%",
+      padding: "12px",
+      borderRadius: "10px",
+      border: "2px solid #60a5fa",
+      fontSize: "15px",
+      outline: "none",
+    },
+    button: {
+      width: "100%",
+      padding: "12px",
+      marginTop: "10px",
+      background: "#2563eb",
+      color: "white",
+      border: "none",
+      borderRadius: "10px",
+      cursor: "pointer",
+      fontSize: "16px",
+    },
+    switchBtn: {
+      marginTop: "15px",
+      width: "100%",
+      padding: "10px",
+      background: "#10b981",
+      border: "none",
+      color: "white",
+      borderRadius: "10px",
+      cursor: "pointer",
+    },
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "50px auto" }}>
-      {!showSignup ? (
-        <>
-          <h2>Login</h2>
-          <input
-            type="text"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="form-control mb-2"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="form-control mb-2"
-          />
-          <button className="btn btn-primary w-100 mb-2" onClick={handleLogin}>
-            Login
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h2 style={styles.title}>{isLogin ? "Login" : "Register"}</h2>
+
+        <form onSubmit={handleSubmit}>
+          <div style={styles.inputBox}>
+            <label style={styles.label}>Username</label>
+            <input
+              style={styles.input}
+              placeholder="Enter Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
+          </div>
+
+          <div style={styles.inputBox}>
+            <label style={styles.label}>Password</label>
+            <input
+              style={styles.input}
+              type="password"
+              placeholder="Enter Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button style={styles.button}>
+            {isLogin ? "Login" : "Register"}
           </button>
-          <button
-            className="btn btn-secondary w-100"
-            onClick={() => setShowSignup(true)}
-          >
-            New User? Signup
-          </button>
-        </>
-      ) : (
-        <>
-          <h2>Signup</h2>
-          <input
-            type="text"
-            placeholder="New Username"
-            value={newUsername}
-            onChange={(e) => setNewUsername(e.target.value)}
-            className="form-control mb-2"
-          />
-          <input
-            type="password"
-            placeholder="New Password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="form-control mb-2"
-          />
-          <button className="btn btn-success w-100 mb-2" onClick={handleSignup}>
-            Signup
-          </button>
-          <button
-            className="btn btn-secondary w-100"
-            onClick={() => setShowSignup(false)}
-          >
-            Back to Login
-          </button>
-        </>
-      )}
+        </form>
+
+        <button style={styles.switchBtn} onClick={() => setIsLogin(!isLogin)}>
+          {isLogin ? "Go Register" : "Go Login"}
+        </button>
+      </div>
     </div>
   );
 }
+
+export default Login;
