@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-
 import Navbar from "./Product/Navbar";
 import { AuthProvider } from "./Product/AuthContext";
-
+import "bootstrap/dist/css/bootstrap.min.css";
 import Login from "./Login";
 import RDUser from "./Product/RDUser";
-import RDPassbook from "./Product/RDPassbook";
+import Passbook from "./Product/Passbook";
 import ReportPage from "./Product/ReportPage";
 import FinanceHome from "./Product/Home";
 
@@ -22,7 +21,6 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        {/* Navbar show only after login */}
         {isLoggedIn && <Navbar setIsLoggedIn={setIsLoggedIn} />}
 
         <Routes>
@@ -47,10 +45,10 @@ function App() {
           />
 
           <Route
-            path="/RDPassbook"
+            path="/Passbook"
             element={
               <ProtectedRoute isLoggedIn={isLoggedIn}>
-                <RDPassbook />
+                <Passbook />
               </ProtectedRoute>
             }
           />

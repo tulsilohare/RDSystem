@@ -11,10 +11,17 @@ import {
   Button,
 } from "react-bootstrap";
 import axios from "axios";
+import { FaEye, FaEdit, FaUser } from "react-icons/fa";
+import { MdDelete, MdClose } from "react-icons/md";
+import { RiUserSettingsFill } from "react-icons/ri";
 
 function RDUser() {
   const [showUpdate, setShowUpdate] = useState(false);
   const [editUser, setEditUser] = useState({});
+  const [data, setData] = useState([]);
+  const [totalMoney, setTotalMoney] = useState(0);
+  const [showView, setShowView] = useState(false);
+  const [viewUser, setViewUser] = useState({});
 
   const handleEdit = (user) => {
     setEditUser(user);
@@ -23,20 +30,13 @@ function RDUser() {
 
   const handleUpdateChange = (e) => {
     const { name, value } = e.target;
-
-    setEditUser({
-      ...editUser,
-      [name]: value,
-    });
+    setEditUser({ ...editUser, [name]: value });
   };
-
-  const [data, setData] = useState([]);
-  const [totalMoney, setTotalMoney] = useState(0);
 
   const fetchData = () => {
     const rid = localStorage.getItem("rid");
     api.get(`/rduserbyid/${rid}`).then((res) => {
-      setData(res.data); // ✅ direct array
+      setData(res.data);
       let sum = 0;
       res.data.forEach((item) => {
         sum = sum + item.rdamt;
@@ -46,34 +46,19 @@ function RDUser() {
   };
 
   const deleteUser = (id) => {
-    api
-      .delete(`/rdudelete/${id}`)
-      .then(() => {
-        alert("Deleted Successfully");
-        fetchData();
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    api.delete(`/rdudelete/${id}`).then(() => {
+      alert("Deleted Successfully");
+      fetchData();
+    });
   };
 
   const updateUser = () => {
-    api
-      .put("http://localhost:8080/rduserupdate", editUser)
-
-      .then(() => {
-        alert("User Updated Successfully");
-        setShowUpdate(false);
-        fetchData();
-      })
-
-      .catch((err) => {
-        console.log(err);
-      });
+    api.put("http://localhost:8080/rduserupdate", editUser).then(() => {
+      alert("User Updated Successfully");
+      setShowUpdate(false);
+      fetchData();
+    });
   };
-
-  const [showView, setShowView] = useState(false);
-  const [viewUser, setViewUser] = useState({});
 
   const handleView = (user) => {
     setViewUser(user);
@@ -84,14 +69,94 @@ function RDUser() {
     fetchData();
   }, []);
 
+  const styles = `
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px);}
+    to { opacity: 1; transform: translateY(0);}
+  }
+
+  @keyframes zoomIn {
+    from { transform: scale(0.9); opacity: 0;}
+    to { transform: scale(1); opacity: 1;}
+  }
+
+  .rd-header {
+    animation: fadeIn 1s ease-in-out;
+    background: linear-gradient(135deg,#2c67d8,#4facfe);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+
+  .rd-card {
+    border-radius: 15px;
+    transition: 0.4s;
+  }
+
+  .rd-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.25);
+  }
+
+  .rd-table {
+    animation: zoomIn 0.8s ease;
+  }
+
+  .rd-table tbody tr {
+    transition: 0.3s;
+  }
+
+  .rd-table tbody tr:hover {
+    background-color: #f1f1f1;
+    transform: scale(1.01);
+  }
+
+  .rd-btn {
+    transition: 0.3s;
+  }
+
+  .rd-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+  }
+
+  .rd-icon {
+    transition: 0.3s;
+  }
+
+  .rd-icon:hover {
+    transform: scale(1.2);
+    color: #007bff;
+  }
+
+  .rd-modal .modal-content {
+    border-radius: 15px;
+    animation: zoomIn 0.5s ease;
+  }
+
+  .rd-input {
+    border-radius: 10px;
+  }
+
+  .rd-input:focus {
+    box-shadow: 0 0 10px #4facfe;
+  }
+  `;
+
   return (
     <>
-      {/* viewModal */}
-      <Modal show={showView} onHide={() => setShowView(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>RD User Details</Modal.Title>
-        </Modal.Header>
+      <style>{styles}</style>
 
+      <Modal
+        show={showView}
+        onHide={() => setShowView(false)}
+        size="lg"
+        className="rd-modal"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <FaEye className="me-2" />
+            RD User Details
+          </Modal.Title>
+        </Modal.Header>
         <Modal.Body>
           <Row>
             <Col md={6}>
@@ -176,7 +241,6 @@ function RDUser() {
             </Col>
           </Row>
         </Modal.Body>
-
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowView(false)}>
             Close
@@ -184,12 +248,15 @@ function RDUser() {
         </Modal.Footer>
       </Modal>
 
-      {/* rduserupadate */}
-      <Modal show={showUpdate} onHide={() => setShowUpdate(false)} size="mg">
+      <Modal
+        show={showUpdate}
+        onHide={() => setShowUpdate(false)}
+        size="mg"
+        className="rd-modal"
+      >
         <Modal.Header closeButton>
           <Modal.Title>Update RD User</Modal.Title>
         </Modal.Header>
-
         <Modal.Body>
           <Form>
             <Row>
@@ -374,12 +441,11 @@ function RDUser() {
           </Form>
         </Modal.Body>
       </Modal>
-
       <Container fluid>
         {/* HEADER */}
         <div
+          className="rd-header"
           style={{
-            background: "#2c67d8",
             padding: "20px",
             color: "white",
             borderRadius: "10px",
@@ -388,13 +454,17 @@ function RDUser() {
         >
           <Row>
             <Col md={8}>
-              <h3>RD MANAGEMENT SYSTEM</h3>
+              <h3>
+                <RiUserSettingsFill className="me-2" />
+                RD MANAGEMENT SYSTEM
+              </h3>
               <p>Recurring Deposit Dashboard</p>
             </Col>
 
             <Col md={2}>
-              <Card className="text-center">
+              <Card className="text-center rd-card">
                 <Card.Body>
+                  <FaUser className="mb-1" />
                   <h6>Total Users</h6>
                   <h4>{data.length}</h4>
                 </Card.Body>
@@ -404,6 +474,7 @@ function RDUser() {
             <Col md={2}>
               <Card className="text-center">
                 <Card.Body>
+                  <FaEye className="mb-1" />
                   <h6>Total Money</h6>
                   <h4>₹ {totalMoney}</h4>
                 </Card.Body>
@@ -412,12 +483,10 @@ function RDUser() {
           </Row>
         </div>
 
-        {/* TABLE */}
-
         <div className="card shadow-sm mt-3">
           <h1 className="flex text-center m-3">USER HISTORY</h1>
           <div className="card-body table-responsive">
-            <Table striped bordered hover>
+            <Table striped bordered hover className="rd-table">
               <thead className="table-dark">
                 <tr>
                   <th>ID</th>
@@ -432,7 +501,6 @@ function RDUser() {
                   <th>Action</th>
                 </tr>
               </thead>
-
               <tbody>
                 {data.map((item, index) => (
                   <tr key={index}>
@@ -449,26 +517,30 @@ function RDUser() {
                       <Button
                         variant="info"
                         size="sm"
-                        className="me-2"
+                        className="me-2 rd-btn"
                         onClick={() => handleView(item)}
                       >
+                        <FaEye className="rd-icon me-1" />
                         View
                       </Button>
 
                       <Button
                         variant="success"
                         size="sm"
-                        className="me-2"
+                        className="me-2 rd-btn"
                         onClick={() => handleEdit(item)}
                       >
+                        <FaEdit className="rd-icon me-1" />
                         Update
                       </Button>
 
                       <Button
                         variant="danger"
                         size="sm"
+                        className="rd-btn"
                         onClick={() => deleteUser(item.rid)}
                       >
+                        <MdDelete className="rd-icon me-1" />
                         Delete
                       </Button>
                     </td>
@@ -482,5 +554,4 @@ function RDUser() {
     </>
   );
 }
-
 export default RDUser;

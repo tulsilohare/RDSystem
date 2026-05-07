@@ -1,86 +1,36 @@
-import Button from "react-bootstrap/Button";
-import React, { useEffect, useState } from "react";
-import { useContext } from "react";
+import React, { useState, useContext } from "react";
+import {
+  Button,
+  Container,
+  Modal,
+  Form,
+  Row,
+  Col,
+  Card,
+} from "react-bootstrap";
 import "bootstrap-icons/font/bootstrap-icons.css";
-import { Container, Modal, Form, Row, Col, Card } from "react-bootstrap";
-import axios from "axios";
 import api from "./Product/api";
 import { AuthContext } from "./Product/AuthContext";
-import Table from "react-bootstrap/Table";
 import Logo from "./assets/expences.png";
 import { useNavigate } from "react-router-dom";
 
 function Login({ setIsLoggedIn }) {
-  const [data, setData] = useState([]);
-  const [showTerms, setShowTerms] = useState(false);
-  const handleTermsClose = () => setShowTerms(false);
-  const handleTermsShow = () => setShowTerms(true);
   const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [showRegister, setShowRegister] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [show, setShow] = useState(false);
-  const handleClose = () => {
-    setShow(false);
-    resetForm();
-  };
-  const handleShow = () => setShow(true);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!formData.agree) {
-      alert("Please accept Terms & Conditions");
-      return;
-    }
-
-    const cleanedData = {
-      rid: formData.rid ? parseInt(formData.rid) : 0,
-      mobile: formData.mobile,
-      password: formData.password,
-      name: formData.name,
-      adder: formData.adder,
-      dob: formData.dob ? formData.dob : null,
-      gender: formData.gender,
-      rddate: formData.rddate ? formData.rddate : null,
-      rdamt: formData.rdamt ? parseInt(formData.rdamt) : 0,
-      accupation: formData.accupation,
-      acno: formData.acno,
-      adharno: formData.adharno,
-      panno: formData.panno,
-      nname: formData.nname,
-      naddr: formData.naddr,
-      nadharno: formData.nadharno,
-      npanno: formData.npanno,
-      agree: formData.agree,
-    };
-
-    console.log("Sending Data:", cleanedData);
-
-    api
-      .post("/rdusave", cleanedData)
-      .then((res) => {
-        alert("Register Success....!");
-        fetchUsers();
-        handleClose();
-        setIsLoggedIn(true);
-        navigate("/RDuser");
-      })
-      .catch((err) => {
-        console.log("SERVER ERROR:", err.response?.data);
-      });
-  };
-
   const [loginData, setLoginData] = useState({
     mobile: "",
     password: "",
   });
 
-  const hndleChange = (e) => {
-    setLoginData({
-      ...loginData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const [formData, setFormData] = useState({
+    mobile: "",
+    password: "",
+    name: "",
+    agree: false,
+  });
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -97,64 +47,46 @@ function Login({ setIsLoggedIn }) {
           rid: res.data.rid,
           name: res.data.name,
         });
+
         setIsLoggedIn(true);
-        navigate("/RDuser");
+        navigate("/RDUser");
       })
-      .catch((err) => {
-        alert("Login Field.....!");
-      });
+      .catch(() => alert("Invalid credentials"));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.agree) {
+      alert("Accept Terms first");
+      return;
+    }
+
+    api
+      .post("/rdusave", formData)
+      .then(() => {
+        alert("Register Success");
+        setShowRegister(false);
+      })
+      .catch(() => alert("Error in registration"));
+  };
+
+  const handleLoginChange = (e) => {
+    setLoginData({ ...loginData, [e.target.name]: e.target.value });
   };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-
     setFormData({
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
   };
 
-  const [formData, setFormData] = useState({
-    rid: "",
-    mobile: "",
-    password: "",
-    name: "",
-    adder: "",
-    dob: "",
-    gender: "",
-    rddate: "",
-    rdamt: "",
-    accupation: "",
-    acno: "",
-    adharno: "",
-    panno: "",
-    nname: "",
-    naddr: "",
-    nadharno: "",
-    npanno: "",
-    agree: false,
-  });
-
-  const fetchUsers = () => {
-    const rid = localStorage.getItem("rid");
-    if (!rid) return; // stop API call
-    api.get(`/rduserbyid/${rid}`).then((res) => {
-      {
-        "Bearer " + localStorage.getItem("token");
-      }
-      setData([res.data]);
-    });
-  };
-  // onload
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
   return (
     <>
-      <Modal show={showTerms} onHide={handleTermsClose} size="lg">
+      <Modal show={showTerms} onHide={() => setShowTerms(false)} size="lg">
         <Modal.Header closeButton>
-          <Modal.Title>Rules and Conditions</Modal.Title>
+          <Modal.Title>Terms & Conditions</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
@@ -177,9 +109,7 @@ function Login({ setIsLoggedIn }) {
               be deducted as administrative charges.
             </li>
           </ul>
-
           <hr />
-
           <h5>Loan Rules</h5>
           <ul>
             <li>A loan can be given only against the R.D. passbook.</li>
@@ -190,18 +120,14 @@ function Login({ setIsLoggedIn }) {
               To take a loan, two guarantors with R.D. passbooks are required.
             </li>
           </ul>
-
           <hr />
-
           <h5>Loan Amount Details</h5>
           <ul>
             <li>R.D. Amount ₹1000 → Loan Amount ₹10,000</li>
             <li>R.D. Amount ₹2000 → Loan Amount ₹20,000</li>
             <li>R.D. Amount ₹3000 → Loan Amount ₹30,000 to ₹40,000</li>
           </ul>
-
           <hr />
-
           <p>
             <b>Declaration:</b>
             <br />I confirm that I have read and understood all the rules and
@@ -211,17 +137,16 @@ function Login({ setIsLoggedIn }) {
         </Modal.Body>
 
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleTermsClose}>
+          <Button variant="secondary" onClick={() => setShowTerms(false)}>
             Close
           </Button>
         </Modal.Footer>
       </Modal>
 
-      {/* loginPage */}
       <div
         style={{
           minHeight: "100vh",
-          background: "linear-gradient(135deg, #1e3c72, #2a5298)",
+          background: "linear-gradient(135deg,#1e3c72,#2a5298)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -230,84 +155,57 @@ function Login({ setIsLoggedIn }) {
         <Container>
           <Row className="justify-content-center">
             <Col md={5}>
-              <Card
-                className="p-4 shadow-lg"
-                style={{
-                  borderRadius: "20px",
-                  background: "rgba(255,255,255,0.1)",
-                  backdropFilter: "blur(10px)",
-                  color: "white",
-                }}
-              >
+              <Card className="p-4 shadow-lg" style={{ borderRadius: "20px" }}>
                 <Card.Body>
-                  <div className="text-center mb-4">
-                    <img
-                      src={Logo}
-                      alt={Logo}
-                      style={{ height: 80, width: 90 }}
-                    />
-                    <h3>
-                      Aman<span style={{ color: "blue" }}>Finance</span>
-                    </h3>
+                  <div className="text-center mb-3">
+                    <img src={Logo} alt="logo" height={70} />
+                    <h4>Tulsi Finance</h4>
                   </div>
 
-                  <Form className="text-center" onSubmit={handleLogin}>
-                    <Form.Group className="mb-3">
-                      <Form.Label>Mobile Number</Form.Label>
+                  <Form onSubmit={handleLogin}>
+                    <Form.Control
+                      className="mb-3"
+                      name="mobile"
+                      placeholder="Mobile"
+                      onChange={handleLoginChange}
+                      required
+                    />
+
+                    <div style={{ position: "relative" }}>
                       <Form.Control
-                        name="mobile"
-                        placeholder="Enter mobile"
-                        onChange={hndleChange}
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        placeholder="Password"
+                        onChange={handleLoginChange}
                         required
                       />
-                    </Form.Group>
+                      <i
+                        className={
+                          showPassword ? "bi bi-eye-slash" : "bi bi-eye"
+                        }
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{
+                          position: "absolute",
+                          right: 10,
+                          top: 10,
+                          cursor: "pointer",
+                        }}
+                      ></i>
+                    </div>
 
-                    <Form.Group className="mb-3">
-                      <Form.Label>Password</Form.Label>
-
-                      <div style={{ position: "relative" }}>
-                        <Form.Control
-                          type={showPassword ? "text" : "password"}
-                          placeholder="Enter Password"
-                          name="password"
-                          onChange={hndleChange}
-                          required
-                        />
-
-                        <i
-                          className={
-                            showPassword ? "bi bi-eye-slash" : "bi bi-eye"
-                          }
-                          onClick={() => setShowPassword(!showPassword)}
-                          style={{
-                            position: "absolute",
-                            right: "12px",
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            cursor: "pointer",
-                            fontSize: "20px",
-                            color: "black",
-                          }}
-                        ></i>
-                      </div>
-                    </Form.Group>
-                    <Button
-                      variant="primary"
-                      type="submit"
-                      className=""
-                      style={{ borderRadius: "10px" }}
-                    >
-                      SingIn
+                    <Button type="submit" className="mt-3 w-100">
+                      Login
                     </Button>
-                    <br />
 
-                    <center>
-                      <h1 style={{ margin: 40 }}>
-                        <Button variant="primary" onClick={handleShow}>
-                          Sign In ? Register New RD User
-                        </Button>
-                      </h1>
-                    </center>
+                    <p className="mt-3 text-center">
+                      New user?{" "}
+                      <span
+                        style={{ color: "blue", cursor: "pointer" }}
+                        onClick={() => setShowRegister(true)}
+                      >
+                        Register
+                      </span>
+                    </p>
                   </Form>
                 </Card.Body>
               </Card>
@@ -316,209 +214,62 @@ function Login({ setIsLoggedIn }) {
         </Container>
       </div>
 
-      <div>
-        <Modal show={show} onHide={handleClose} size="mg">
-          <Modal.Header closeButton>
-            <Modal.Title>Add New RD User</Modal.Title>
-          </Modal.Header>
+      <Modal
+        show={showRegister}
+        onHide={() => setShowRegister(false)}
+        size="lg"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>Register User</Modal.Title>
+        </Modal.Header>
 
-          <Modal.Body>
-            <Form onSubmit={handleSubmit}>
-              <Form.Group>
-                <Form.Label>Mobile</Form.Label>
-                <Form.Control
-                  name="mobile"
-                  value={formData.mobile}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
+        <Modal.Body>
+          <Form onSubmit={handleSubmit}>
+            <Form.Control
+              className="mb-2"
+              name="mobile"
+              placeholder="Mobile"
+              onChange={handleChange}
+              required
+            />
 
-              <Form.Group className="mb-3">
-                <Form.Label>Password</Form.Label>
+            <Form.Control
+              className="mb-2"
+              name="password"
+              placeholder="Password"
+              onChange={handleChange}
+              required
+            />
 
-                <div style={{ position: "relative" }}>
-                  <Form.Control
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter Password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                  />
+            <Form.Control
+              className="mb-2"
+              name="name"
+              placeholder="Name"
+              onChange={handleChange}
+              required
+            />
 
-                  <i
-                    className={showPassword ? "bi bi-eye-slash" : "bi bi-eye"}
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: "absolute",
-                      right: "12px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      cursor: "pointer",
-                      fontSize: "20px",
-                      color: "black",
-                    }}
-                  ></i>
-                </div>
-              </Form.Group>
-              <Form.Group>
-                <Form.Label>Name</Form.Label>
-                <Form.Control
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
+            <Form.Check
+              className="mt-2"
+              type="checkbox"
+              label="Agree Terms"
+              name="agree"
+              onChange={handleChange}
+            />
 
-              <Form.Group>
-                <Form.Label>Address</Form.Label>
-                <Form.Control
-                  name="adder"
-                  value={formData.adder}
-                  onChange={handleChange}
-                  required
-                />
-              </Form.Group>
+            <p
+              style={{ color: "blue", cursor: "pointer" }}
+              onClick={() => setShowTerms(true)}
+            >
+              Read Terms
+            </p>
 
-              <Form.Label>DOB</Form.Label>
-              <Form.Control
-                type="date"
-                name="dob"
-                value={formData.dob}
-                onChange={handleChange}
-                required
-              />
-
-              <Form.Label>Gender</Form.Label>
-              <Form.Select
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Select</option>
-                <option>Male</option>
-                <option>Female</option>
-              </Form.Select>
-
-              <Form.Label>RD Date</Form.Label>
-              <Form.Control
-                type="date"
-                name="rddate"
-                value={formData.rddate}
-                onChange={handleChange}
-                required
-              />
-
-              <Form.Label>RD Amount</Form.Label>
-              <Form.Control
-                type="number"
-                name="rdamt"
-                value={formData.rdamt}
-                onChange={handleChange}
-                required
-              />
-
-              <Form.Label>Occupation</Form.Label>
-              <Form.Control
-                name="accupation"
-                value={formData.accupation}
-                onChange={handleChange}
-                required
-              />
-
-              <Form.Label>Account No</Form.Label>
-              <Form.Control
-                name="acno"
-                value={formData.acno}
-                onChange={handleChange}
-                required
-              />
-
-              <Form.Label>Aadhar No</Form.Label>
-              <Form.Control
-                name="adharno"
-                value={formData.adharno}
-                onChange={handleChange}
-                required
-              />
-
-              <Form.Label>PAN No</Form.Label>
-              <Form.Control
-                name="panno"
-                value={formData.panno}
-                onChange={handleChange}
-                required
-              />
-
-              <hr />
-
-              <h5 style={{ fontWeight: "bold", textAlign: "center" }}>
-                Nominee Details
-              </h5>
-
-              <Form.Label>Nominee Name</Form.Label>
-              <Form.Control
-                name="nname"
-                value={formData.nname}
-                onChange={handleChange}
-                required
-              />
-
-              <Form.Label>Nominee Address</Form.Label>
-              <Form.Control
-                name="naddr"
-                value={formData.naddr}
-                onChange={handleChange}
-                required
-              />
-
-              <Form.Label>Nominee Aadhar</Form.Label>
-              <Form.Control
-                name="nadharno"
-                value={formData.nadharno}
-                onChange={handleChange}
-                required
-              />
-
-              <Form.Label>Nominee PAN</Form.Label>
-              <Form.Control
-                name="npanno"
-                value={formData.npanno}
-                onChange={handleChange}
-                required
-              />
-
-              <hr />
-              <p
-                style={{ cursor: "pointer", color: "blue" }}
-                onClick={handleTermsShow}
-              >
-                Read Terms & Conditions
-              </p>
-              <Form.Check
-                type="checkbox"
-                label="I agree to Terms & Conditions"
-                name="agree"
-                checked={formData.agree}
-                onChange={handleChange}
-                required
-              />
-
-              <div className="mt-3 text-end">
-                <Button variant="secondary" onClick={handleClose}>
-                  Cancel
-                </Button>{" "}
-                <Button variant="success" type="submit">
-                  Submit
-                </Button>
-              </div>
-            </Form>
-          </Modal.Body>
-        </Modal>
-      </div>
+            <Button type="submit" className="mt-2 w-100">
+              Register
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </>
   );
 }

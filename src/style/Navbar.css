@@ -1,3 +1,121 @@
+/* 🌈 Navbar Background Gradient */
 .navbar {
-  background: linear-gradient(to right, #1e3c72, #2a5298);
+  background: linear-gradient(135deg, #0d6efd, #6610f2);
+  transition: all 0.4s ease-in-out;
+}
+
+/* 💰 Logo Styling */
+.navbar-brand {
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #fff !important;
+  transition: transform 0.3s ease;
+}
+
+.navbar-brand:hover {
+  transform: scale(1.08);
+}
+
+/* 📌 Nav Links */
+.nav-link {
+  color: #f8f9fa !important;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* ✨ Hover underline animation */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  left: 0;
+  bottom: 0;
+  background-color: #ffc107;
+  transition: width 0.3s ease-in-out;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-link:hover {
+  color: #ffc107 !important;
+  transform: translateY(-2px);
+}
+
+/* 🔔 Notification Icon */
+.nav-link svg {
+  transition:
+    transform 0.3s ease,
+    color 0.3s ease;
+}
+
+.nav-link:hover svg {
+  transform: rotate(15deg) scale(1.2);
+  color: #ffc107;
+}
+
+/* 👤 Profile Dropdown */
+.dropdown-toggle {
+  display: flex !important;
+  align-items: center;
+  color: #fff !important;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.dropdown-toggle:hover {
+  color: #ffc107 !important;
+  transform: scale(1.05);
+}
+
+/* 🧊 Dropdown Menu */
+.dropdown-menu {
+  border-radius: 12px;
+  padding: 10px;
+  border: none;
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* 🎯 Dropdown Items */
+.dropdown-item {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background: #0d6efd;
+  color: #fff;
+  transform: translateX(5px);
+}
+
+/* 🚪 Logout Button */
+.btn-danger {
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+  background-color: #dc3545;
+  transform: scale(1.05);
+}
+
+/* 🌟 Navbar Shadow Hover */
+.navbar:hover {
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* 🎬 Fade Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
